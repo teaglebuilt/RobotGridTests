@@ -1,0 +1,51 @@
+version: '2'
+services:
+
+  selenium_hub:
+    container_name: selenium_hub
+    image: selenium/hub
+    networks:
+      cao_ui_prodchecks: {}
+    ports:
+      - "4444"
+
+  firefoxnode:
+    container_name: firefox_node
+    image: selenium/node-firefox
+    networks:
+      cao_ui_prodchecks: {}
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=selenium_hub
+      - HUB_PORT_4444_TCP_PORT=4444
+    depends_on:
+      - selenium_hub
+    ports:
+      - 5554
+
+  chromenode:
+    container_name: chrome_node
+    image: selenium/node-chrome
+    networks:
+      cao_ui_prodchecks: {}
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=selenium_hub
+      - HUB_PORT_4444_TCP_PORT=4444
+    depends_on:
+      - selenium_hub
+    ports:
+      - 5555
+
+  robottests:
+    container_name: robottests
+    command: /bin/sleep infinity
+    networks:
+      cao_ui_prodchecks: {}
+    depends_on:
+      - selenium_hub
+    build: .
+    volumes:
+      - ./reports:/cao_ui_tests/reports
+
+networks:
+  cao_ui_prodchecks:
+    driver: bridge
